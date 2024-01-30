@@ -1,42 +1,40 @@
 <?php
+// Include necessary files and start the session
 @session_start();
 include 'class/class.scdb.php';
-
 $query = new SCDB();
 $mode = $_GET['Action'] ?? '';
 
-if ($mode == "chklogin") {
-    $user_no = $_POST['txtuser'] ?? '';
-    $user_pw = $_POST['txtpass'] ?? '';
+// Check if the form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get user input from the form
+    $p_cid = isset($_POST['p_cid']) ? $_POST['p_cid'] : '';
+    $p_tel = isset($_POST['p_tel']) ? $_POST['p_tel'] : '';
 
-    $params = array($user_no);
-    $result = $query->fetch("SELECT p_id, u_user, u_pass, u_status FROM tb_hr_user_io WHERE u_user = ?", $params);
-    $hashed_password = password_hash($user_pw, PASSWORD_DEFAULT);
-
-
-    if (is_array($result) && count($result) > 0) {
-        $hashed_password = $result['u_pass'];
-
-        if (password_verify($user_pw, $hashed_password)) {
-            $user = $result['u_user'];
-            $p_id = $result['p_id'];
-            $u_status = $result['u_status'];
-            $_SESSION['USER_NO'] = $user;
-            $_SESSION['p_id'] = $p_id;
-
-            if ($u_status == 1) {
-                $response = array('success' => true, 'redirect' => 'index_admin.php');
-            } elseif ($u_status == 0) {
-                $response = array('success' => true, 'redirect' => 'service.php');
-            }
-        } else {
-            $response = array('success' => false, 'message' => 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
-        }
+    // Validate input (add more validation as needed)
+    if (empty($p_cid) || empty($p_tel)) {
+        $response = array('success' => false, 'message' => 'กรุณากรอกข้อมูลทุกช่อง');
     } else {
-        $response = array('success' => false, 'message' => 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง');
+        // Check if the provided p_cid and p_tel match an entry in tb_hr_profile
+        $profileParams = array($p_cid, $p_tel);
+        $profileResult = $query->execute("SELECT p_id FROM tb_hr_profile WHERE p_cid = ? AND p_tel = ?", $profileParams);
+
+        // Fetch the result as an associative array
+        $profileData = $profileResult->fetch(PDO::FETCH_ASSOC);
+
+        // Check if a matching profile is found
+        if ($profileData) {
+            // If the profile is found, redirect to the page for creating a new password
+            $_SESSION['p_cid'] = $p_cid;
+            $_SESSION['p_tel'] = $p_tel;
+
+            $response = array('success' => true, 'redirect' => 'create_new_password.php');
+        } else {
+            $response = array('success' => false, 'message' => 'ข้อมูลไม่ถูกต้อง');
+        }
     }
 
-    // Send the JSON response to the AJAX request
+    // Send JSON response
     header('Content-Type: application/json');
     echo json_encode($response);
     exit();
@@ -50,7 +48,7 @@ if ($mode == "chklogin") {
 
 <head>
     <meta charset="utf-8">
-    <title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
+    <title>ลืมรหัสผ่าน</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -92,7 +90,7 @@ if ($mode == "chklogin") {
                     <img class="img-fluid w-100" src="img/02.png">
                 </div>
             <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
-                <h1 class="mb- text-center">Login</h1>
+                <h1 class="mb- text-center">ลืมรหัสผ่าน</h1>
                 <div class="form-signin w-100 m-auto">
                 <form name="form1" id="loginForm" method="post" action="?Action=chklogin" onSubmit="return checkform(this);">
                     <div class="bgimg-1" id="fh5co-wrapper">
@@ -107,17 +105,17 @@ if ($mode == "chklogin") {
                                             <div class="login-form" id="login-form">
                                                 <div class="form-floating mb-3">
                                                     <span class="input-group-addon" id="basic-addon1"></i></span>
-                                                    <input name="txtuser" type="text" class="form-control" placeholder="เลขทะเบียนเจ้าหน้าที่" aria-describedby="basic-addon1" id="txtuser" oninput=" this.value = this.value.replace(/(\..*)\./g, '$1');" onKeyDown="if(this.value.length==10 && event.keyCode!=11 && event.keyCode!=12) return false;" required="true" >
-                                                    <label>เลขทะเบียนเจ้าหน้าที่</label>
+                                                    <input class="form-control" type="text" name="p_cid" placeholder="เลขบัตรประชาชน" aria-describedby="basic-addon1" id="p_cid" required="true">
+                                                    <label>เลขบัตรประชาชน</label>
                                                 </div>
 
                                                 <div class="form-floating mb-3 ">
                                                     <span class="input-group-addon" id="basic-addon1"></i></span>
-                                                    <input name="txtpass" type="password" class="form-control" placeholder="รหัสผ่าน" aria-describedby="basic-addon1" id="txtpass" required="true">
-                                                    <label>รหัสผ่าน</label>
+                                                    <input class="form-control"  type="text" name="p_tel" placeholder="เบอร์โทรศัพท์" aria-describedby="basic-addon1" id="p_tel" required="true">
+                                                    <label>เบอร์โทรศัพท์</label>
                                                 </div>
 
-                                                    <button type="submit" class="btn btn-primary" id="btnLogin"><i ></i> เข้าสู่ระบบ</button>
+                                                    <button type="submit" class="btn btn-primary"><i ></i> ตรวจสอบข้อมูล</button>
 
                                             </div>
                                         </div>
@@ -145,44 +143,64 @@ if ($mode == "chklogin") {
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
+    <script>
+        $('.js-tilt').tilt({
+            scale: 1.1
+        });
+    </script>
+
+    <script src="js/main.js"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#loginForm').submit(function(e) {
-                e.preventDefault();
+ $(document).ready(function () {
+    $('#loginForm').submit(function (e) {
+        e.preventDefault();
 
-                $.ajax({
-                    type: $(this).attr('method'),
-                    url: $(this).attr('action'),
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'เข้าสู่ระบบสำเร็จ',
-                                text: 'กำลังเปลี่ยนเส้นทาง...',
-                                icon: 'success',
-                                timer: 1000,
-                                timerProgressBar: true,
-                                showConfirmButton: false
-                            }).then(() => {
-                                window.location.href = response.redirect;
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'เข้าสู่ระบบไม่สำเร็จ',
-                                text: response.message,
-                                icon: 'error',
-                                showConfirmButton: true
-                            });
-                        }
-                    }
+        $.ajax({
+            type: $(this).attr('method'),
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function (response) {
+                if (response.success) {
+                    // Show success message and redirect after a delay
+                    Swal.fire({
+                        title: 'ข้อมูลถูกต้อง',
+                        text: 'กำลังเปลี่ยนเส้นทาง...',
+                        icon: 'success',
+                        timer: 1000,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = response.redirect;
+                    });
+                } else {
+                    // Show error message
+                    Swal.fire({
+                        title: 'ข้อมูลไม่ถูกต้อง',
+                        text: response.message,
+                        icon: 'error',
+                        showConfirmButton: true
+                    });
+                }
+            },
+            error: function () {
+                // Handle AJAX errors
+                Swal.fire({
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'มีบางอย่างผิดพลาดในการตรวจสอบข้อมูล',
+                    icon: 'error',
+                    showConfirmButton: true
                 });
-            });
+            }
         });
+    });
+});
+
     </script>
 
 </div>
 </body>
+
 
 
 </html>

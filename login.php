@@ -50,7 +50,7 @@ if ($mode == "chklogin") {
 
 <head>
     <meta charset="utf-8">
-    <title>Makaan - Real Estate HTML Template</title>
+    <title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -117,9 +117,12 @@ if ($mode == "chklogin") {
                                                     <label>รหัสผ่าน</label>
                                                 </div>
 
-                                                <div class="center mb-3">
-                                                    <button type="submit" class="btn btn-primary px-3 d-none d-lg-flex me-2" id="btnLogin"><i ></i> เข้าสู่ระบบ</button>
-                                                </div>
+                                                    <button type="submit" class="btn btn-primary" id="btnLogin"><i ></i> เข้าสู่ระบบ</button>
+                                                    <div class="text-center p-t-20">
+                                                        <a href="register.php" >ลงทะเบียน</a>
+                                                        <span class="txt1"> / </span>
+                                                        <a href="forgot-password.php">ลืมรหัสผ่าน</a>
+                                                    </div>
                                             </div>
                                         </div>
                                     </div>
@@ -134,9 +137,6 @@ if ($mode == "chklogin") {
         </div>
     </div>
 </div>
-
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
     </div>
 
     <!-- JavaScript Libraries -->

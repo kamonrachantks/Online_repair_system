@@ -12,9 +12,10 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto">
-                <a href="index.php" class="nav-item nav-link ">หน้าแรก</a>
                 <?php if (!isset($_SESSION['p_id']) || $_SESSION['p_id'] == 0) { ?>
-                    <a href="login.php" class="nav-item nav-link active">เข้าสู่ระบบ</a>
+                    <a href="index.php" class="nav-item nav-link active">เข้าสู่ระบบ</a>
+                    <a href="register.php" class="nav-item nav-link ">ลงทะเบียน</a>
+                    <a href="forgot-password.php" class="nav-item nav-link ">ลืมรหัสผ่าน</a>
                 <?php } ?>
 
                 <?php if (isset($_SESSION['p_id']) && $_SESSION['p_id'] > 0) { ?>
