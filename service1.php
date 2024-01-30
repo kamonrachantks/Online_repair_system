@@ -50,6 +50,8 @@ $stmtAppointmentHistory->execute();
 <html lang="en">
 
 <head>
+<meta charset="utf-8">
+<title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
 
     <style>
         .form-label {

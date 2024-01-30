@@ -52,6 +52,8 @@ try {
 <html lang="en">
 
 <head>
+<meta charset="utf-8">
+<title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
     <!-- Head content remains unchanged -->
 
     <!-- Custom CSS for Form Styling -->

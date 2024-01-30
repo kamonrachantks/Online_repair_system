@@ -151,6 +151,8 @@ exit();
 <html lang="en">
 
 <head>
+<meta charset="utf-8">
+<title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11">
     <!-- Head content remains unchanged -->

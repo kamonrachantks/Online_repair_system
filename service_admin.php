@@ -54,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html lang="en">
+<meta charset="utf-8">
+<title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
 
 <body class="sub_page">
     <div class="wrapper">
