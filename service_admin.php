@@ -12,10 +12,32 @@ try {
         throw new Exception("Database connection error: " . $query->getError());
     }
 
+    // Get search parameters if submitted
+    $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : '';
+    $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : '';
+
     $sqlAppointments = "SELECT m.m_id, d.du_name, m_comment, m.m_date_S, m.m_time, m.m_status FROM tb_du_maint m
                         JOIN tb_durable d ON m.du_id = d.du_id
                         WHERE m.m_status IS NULL";
+
+    // Add search conditions for date range
+    if (!empty($startDate)) {
+        $sqlAppointments .= " AND m.m_date_S >= :startDate";
+    }
+    if (!empty($endDate)) {
+        $sqlAppointments .= " AND m.m_date_S <= :endDate";
+    }
+
     $stmtAppointmentHistory = $query->prepare($sqlAppointments);
+
+    // Bind search parameters
+    if (!empty($startDate)) {
+        $stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+    }
+    if (!empty($endDate)) {
+        $stmtAppointmentHistory->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+    }
+
     $stmtAppointmentHistory->execute();
 
     $errorInfo = $stmtAppointmentHistory->errorInfo();
@@ -24,17 +46,6 @@ try {
     }
 } catch (Exception $e) {
     die("An error occurred: " . $e->getMessage());
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $token = $_POST['token'];
-    $message = $_POST['message'];
-    $m_id = $_POST['m_id'];
-
-    $message .= "\nรหัสการแจ้ง: $m_id";
-
-    // Rest of the code remains the same
-    // ...
 }
 
 ?>
@@ -75,6 +86,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <div style="padding-top: 30px;">
                                                 <h4 style="padding-bottom: 20px;text-align: center;color: #5c6bc0 ;">รายการแจ้งซ่อมรอยืนยัน</h4>
                                                 <div>
+                                                    <!-- Add date search form -->
+                                                    <form method="get">
+                                                        <label for="startDate">ตั้งแต่วันที่:</label>
+                                                        <input type="date" name="startDate" id="startDate" value="<?php echo $startDate; ?>">
+
+                                                        <label for="endDate">ถึงวันที่:</label>
+                                                        <input type="date" name="endDate" id="endDate" value="<?php echo $endDate; ?>">
+
+                                                        <button type="submit" class="btn btn-primary">ค้นหา</button>
+                                                    </form>
+
                                                     <table border="2" class="table">
                                                         <thead class="gray-bg">
                                                             <tr>
@@ -209,4 +231,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <?php include_once('footer.php'); ?>
 </html>
-

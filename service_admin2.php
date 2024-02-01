@@ -17,50 +17,99 @@ $recordsPerPage = 30;
 // Get the current page or set it to 1 if not set
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
+// Get search parameters if submitted
+$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+$startDate = isset($_GET['startDate']) ? $_GET['startDate'] : '';
+$endDate = isset($_GET['endDate']) ? $_GET['endDate'] : '';
+
 // Calculate the starting record for the current page
 $startFrom = ($page - 1) * $recordsPerPage;
 
+try {
+    if (!$query->connect()) {
+        throw new Exception("Database connection error: " . $query->getError());
+    }
 
-
-// Modify the SQL query to include the search condition and pagination
-$sqlAppointments = "SELECT m.m_id, d.du_name, m.m_date_S, m.m_time, m.m_status
+    // Modify the SQL query to include the search condition and pagination
+    $sqlAppointments = "SELECT m.m_id, d.du_name, m.m_date_S, m.m_time, m.m_status
                     FROM tb_du_maint m
                     JOIN tb_durable d ON m.du_id = d.du_id
-                    WHERE m.m_status = 1 
-                    ORDER BY m.m_id DESC
+                    WHERE m.m_status = 1";
+
+    // Add search conditions
+    if (!empty($searchTerm)) {
+        $sqlAppointments .= " AND m.m_id = :searchTerm";
+    }
+    if (!empty($startDate)) {
+        $sqlAppointments .= " AND m.m_date_S >= :startDate";
+    }
+    if (!empty($endDate)) {
+        $sqlAppointments .= " AND m.m_date_S <= :endDate";
+    }
+
+    $sqlAppointments .= " ORDER BY m.m_id DESC
                     OFFSET $startFrom ROWS
                     FETCH NEXT $recordsPerPage ROWS ONLY";
-$stmtAppointmentHistory = $query->prepare($sqlAppointments);
+    $stmtAppointmentHistory = $query->prepare($sqlAppointments);
 
-// Bind the search term parameter if it exists
-if (!empty($searchTerm)) {
-    $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+    // Bind search parameters
+    if (!empty($searchTerm)) {
+        $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+    }
+    if (!empty($startDate)) {
+        $stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+    }
+    if (!empty($endDate)) {
+        $stmtAppointmentHistory->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+    }
+
+    $stmtAppointmentHistory->execute();
+
+    // Get the total number of records for pagination
+    $totalRecordsQuery = "SELECT COUNT(*) as total FROM tb_du_maint WHERE m_status = 1";
+
+    // Add search conditions
+    if (!empty($searchTerm)) {
+        $totalRecordsQuery .= " AND m_id = :searchTerm";
+    }
+    if (!empty($startDate)) {
+        $totalRecordsQuery .= " AND m_date_S >= :startDate";
+    }
+    if (!empty($endDate)) {
+        $totalRecordsQuery .= " AND m_date_S <= :endDate";
+    }
+
+    $totalRecordsStmt = $query->prepare($totalRecordsQuery);
+
+    // Bind search parameters
+    if (!empty($searchTerm)) {
+        $totalRecordsStmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
+    }
+    if (!empty($startDate)) {
+        $totalRecordsStmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+    }
+    if (!empty($endDate)) {
+        $totalRecordsStmt->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+    }
+
+    $totalRecordsStmt->execute();
+    $totalRecords = $totalRecordsStmt->fetch(PDO::FETCH_ASSOC)['total'];
+
+    // Calculate the total number of pages
+    $totalPages = ceil($totalRecords / $recordsPerPage);
+
+} catch (Exception $e) {
+    // Log or handle the exception appropriately
+    die("An error occurred: " . $e->getMessage());
 }
-
-$stmtAppointmentHistory->execute();
-
-// Get the total number of records for pagination
-$totalRecordsQuery = "SELECT COUNT(*) as total FROM tb_du_maint WHERE m_status = 1 ";
-$totalRecordsStmt = $query->prepare($totalRecordsQuery);
-
-// Bind the search term parameter if it exists
-if (!empty($searchTerm)) {
-    $totalRecordsStmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
-}
-
-$totalRecordsStmt->execute();
-$totalRecords = $totalRecordsStmt->fetch(PDO::FETCH_ASSOC)['total'];
-
-// Calculate the total number of pages
-$totalPages = ceil($totalRecords / $recordsPerPage);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-<meta charset="utf-8">
-<title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
+    <meta charset="utf-8">
+    <title>ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์</title>
     <style>
         body {
             height: 100vh;
@@ -96,7 +145,20 @@ $totalPages = ceil($totalRecords / $recordsPerPage);
                                             <div style="padding-top: 30px;">
                                                 <h4 style="padding-bottom: 20px;text-align: center;color: #5c6bc0 ;">รายการแจ้งซ่อมที่เรียบร้อยแล้ว</h4>
                                                 <div>
+                                                    <div style="padding-top: 10px;">
+                                                        <form method="get">
+                                                            <label for="search">ค้นหา :</label>
+                                                            <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
 
+                                                            <label for="startDate">ตั้งแต่วันที่:</label>
+                                                            <input type="date" name="startDate" id="startDate" value="<?php echo $startDate; ?>">
+
+                                                            <label for="endDate">ถึงวันที่:</label>
+                                                            <input type="date" name="endDate" id="endDate" value="<?php echo $endDate; ?>">
+
+                                                            <button type="submit" class="btn btn-primary">ค้นหา</button>
+                                                        </form>
+                                                    </div>
 
                                                     <div style="padding-top: 30px;">
                                                         <table border="2" class="table">
@@ -156,27 +218,26 @@ $totalPages = ceil($totalRecords / $recordsPerPage);
                 </div>
                 <!-- Display pagination links -->
                 <div style="padding-top: 10px;">
-    <ul class="pagination">
-        <?php
-        if ($page > 1) {
-            echo '<li class="page-item"><a class="page-link" href="?page=1">First</a></li>';
-            $prevPage = $page - 1;
-            echo '<li class="page-item"><a class="page-link" href="?page=' . $prevPage . '">Previous</a></li>';
-        }
+                    <ul class="pagination">
+                        <?php
+                        if ($page > 1) {
+                            echo '<li class="page-item"><a class="page-link" href="?page=1">First</a></li>';
+                            $prevPage = $page - 1;
+                            echo '<li class="page-item"><a class="page-link" href="?page=' . $prevPage . '&search=' . $searchTerm . '&startDate=' . $startDate . '&endDate=' . $endDate . '">Previous</a></li>';
+                        }
 
-        for ($i = 1; $i <= $totalPages; $i++) {
-            echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
-        }
+                        for ($i = 1; $i <= $totalPages; $i++) {
+                            echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&search=' . $searchTerm . '&startDate=' . $startDate . '&endDate=' . $endDate . '">' . $i . '</a></li>';
+                        }
 
-        if ($page < $totalPages) {
-            $nextPage = $page + 1;
-            echo '<li class="page-item"><a class="page-link" href="?page=' . $nextPage . '">Next</a></li>';
-            echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">Last</a></li>';
-        }
-        ?>
-    </ul>
-</div>
-
+                        if ($page < $totalPages) {
+                            $nextPage = $page + 1;
+                            echo '<li class="page-item"><a class="page-link" href="?page=' . $nextPage . '&search=' . $searchTerm . '&startDate=' . $startDate . '&endDate=' . $endDate . '">Next</a></li>';
+                            echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&search=' . $searchTerm . '&startDate=' . $startDate . '&endDate=' . $endDate . '">Last</a></li>';
+                        }
+                        ?>
+                    </ul>
+                </div>
             </div>
         </section>
         <!-- End About Section -->

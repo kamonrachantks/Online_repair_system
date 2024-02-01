@@ -19,14 +19,8 @@
                 <?php } ?>
 
                 <?php if (isset($_SESSION['p_id']) && $_SESSION['p_id'] > 0) { ?>
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">บริการ</a>
-                        <div class="dropdown-menu rounded-0 m-0">
-                            <a href="service_admin3.php" class="dropdown-item">แจ้งซ่อม</a>
-                            <a href="service_admin4.php" class="dropdown-item">ดูประวัติแจ้งซ่อม</a>
-                        </div>
-                    </div>
-            
+                    <a href="service_admin3.php" class="nav-item nav-link">แจ้งซ่อม</a>
+                    <a href="service_admin4.php" class="nav-item nav-link">ดูประวัติแจ้งซ่อม</a>
                     <a href="logout.php" class="nav-item nav-link active">ออกจากระบบ</a>
                 <?php } ?>
             </div>

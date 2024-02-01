@@ -1,4 +1,4 @@
-<!-- Navbar Start -->
+
 <div class="container-fluid nav-bar bg-transparent">
     <nav class="navbar navbar-expand-lg bg-white navbar-light py-0 px-4">
         <a  class="navbar-brand d-flex align-items-center text-center">
@@ -19,14 +19,8 @@
                 <?php } ?>
 
                 <?php if (isset($_SESSION['p_id']) && $_SESSION['p_id'] > 0) { ?>
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">บริการ</a>
-                        <div class="dropdown-menu rounded-0 m-0">
-                            <a href="service.php" class="dropdown-item">แจ้งซ่อม</a>
-                            <a href="service1.php" class="dropdown-item">ดูประวัติแจ้งซ่อม</a>
-                        </div>
-                    </div>
-            
+                    <a href="service.php" class="nav-item nav-link">แจ้งซ่อม</a>
+                    <a href="service1.php" class="nav-item nav-link">ดูประวัติแจ้งซ่อม</a>
                     <a href="logout.php" class="nav-item nav-link active">ออกจากระบบ</a>
                 <?php } ?>
                 
@@ -34,4 +28,3 @@
         </div>
     </nav>
 </div>
-<!-- Navbar End -->

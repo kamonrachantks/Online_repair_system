@@ -29,6 +29,18 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $sqlAppointmentHistory .= " AND m.m_id = :searchTerm";
 }
 
+// Check if start date is provided
+if (isset($_GET['startDate']) && !empty($_GET['startDate'])) {
+    $startDate = $_GET['startDate'];
+    $sqlAppointmentHistory .= " AND m.m_date_S >= :startDate";
+}
+
+// Check if end date is provided
+if (isset($_GET['endDate']) && !empty($_GET['endDate'])) {
+    $endDate = $_GET['endDate'];
+    $sqlAppointmentHistory .= " AND m.m_date_S <= :endDate";
+}
+
 $stmtAppointmentHistory = $query->prepare($sqlAppointmentHistory);
 $stmtAppointmentHistory->bindParam(':p_id', $u_id, PDO::PARAM_INT);
 
@@ -37,7 +49,18 @@ if (isset($searchTerm)) {
     $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
 }
 
+// Bind start date parameter if set
+if (isset($startDate)) {
+    $stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+}
+
+// Bind end date parameter if set
+if (isset($endDate)) {
+    $stmtAppointmentHistory->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+}
+
 $stmtAppointmentHistory->execute();
+
 
 
 } catch (Exception $e) {
@@ -141,12 +164,20 @@ $stmtAppointmentHistory->execute();
                                         </div>
                                         <!-- Add this form section above your table -->
                                         <div style="padding-top: 10px;">
-                                        <form method="get">
-                                            <label for="search">ค้นหา :</label>
-                                            <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
-                                            <button type="submit" class="btn btn-primary">ค้นหา</button>
-                                        </form>
-                                       </div>
+    <form method="get">
+        <label for="search">ค้นหา :</label>
+        <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
+        
+        <label for="startDate">ตั้งแต่วันที่:</label>
+        <input type="date" name="startDate" id="startDate">
+
+        <label for="endDate">ถึงวันที่:</label>
+        <input type="date" name="endDate" id="endDate">
+
+        <button type="submit" class="btn btn-primary">ค้นหา</button>
+    </form>
+</div>
+
                                        <div style="padding-top: 30px;">
                                         <table border="2" class="table">
                                             <thead class="gray-bg">
