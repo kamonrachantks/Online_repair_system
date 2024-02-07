@@ -23,6 +23,7 @@ if ($mode == "chklogin") {
             $u_status = $result['u_status'];
             $_SESSION['USER_NO'] = $user;
             $_SESSION['p_id'] = $p_id;
+            $_SESSION['u_status'] = $u_status;
 
             if ($u_status == 1) {
                 $response = array('success' => true, 'redirect' => 'index_admin.php');

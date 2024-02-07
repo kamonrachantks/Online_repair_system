@@ -13,12 +13,16 @@ if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
     // Fetch user status from database
     $result = $query->fetch("SELECT u_status FROM tb_hr_user_io WHERE u_user = ?", array($_SESSION['USER_NO']));
     $u_status = $result['u_status'];
-
+    
+    // Set u_status in $_SESSION
+    $_SESSION['u_status'] = $u_status;
+    
     // Check if u_status is 0, then redirect to index.php
-    if ($u_status == 0) {
+    if ($_SESSION['u_status'] == 0) {
         header("location: index.php");
         exit();
     }
+    
 
 
 try {
