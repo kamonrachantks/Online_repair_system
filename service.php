@@ -348,15 +348,6 @@ function duIdExists($du_id, $optionsForDatalist)
         });
     });
 
-    $("#m_comment").change(function () {
-        if ($(this).val() === "อื่นๆ") {
-            $("#other_comment").show();
-            $("#other_comment_input").prop("required", true);
-        } else {
-            $("#other_comment").hide();
-            $("#other_comment_input").prop("required", false);
-        }
-    });
 </script>
 
 </body>
