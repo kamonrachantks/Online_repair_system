@@ -10,7 +10,10 @@ if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
     header("location: login.php");
     exit();
 }
-
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
 try {
     if (!$query->connect()) {
         throw new Exception("Database connection error: " . $query->getError());
@@ -32,11 +35,6 @@ $sqlAppointmentHistory = "SELECT m.m_id, m.m_date_S, m.m_time, m.m_status, d.du_
     JOIN tb_durable d ON m.du_id = d.du_id
     WHERE m.p_id = :p_id";
 
-// Check if the search term is provided
-if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $searchTerm = $_GET['search'];
-    $sqlAppointmentHistory .= " AND m.m_id = :searchTerm";
-}
 
 // Check if start date is provided
 if (isset($_GET['startDate']) && !empty($_GET['startDate'])) {
@@ -53,10 +51,7 @@ if (isset($_GET['endDate']) && !empty($_GET['endDate'])) {
 $stmtAppointmentHistory = $query->prepare($sqlAppointmentHistory);
 $stmtAppointmentHistory->bindParam(':p_id', $u_id, PDO::PARAM_INT);
 
-// Bind search term parameter if set
-if (isset($searchTerm)) {
-    $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
-}
+
 
 // Bind start date parameter if set
 if (isset($startDate)) {
@@ -186,9 +181,6 @@ $stmtAppointmentHistory->execute();
                                         </div>
                                         <div style="padding-top: 10px;">
     <form method="get">
-        <label for="search">ค้นหา :</label>
-        <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
-        
         <label for="startDate">ตั้งแต่วันที่:</label>
         <input type="date" name="startDate" id="startDate">
 

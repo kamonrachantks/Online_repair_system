@@ -5,6 +5,10 @@ define('LINE_API', "https://notify-api.line.me/api/notify");
 
 $token = "Y3zH1oQp4rVu0Wx4wINmhNzy5wCwpVwCv5Dp8kfVkkI"; // ใส่ Token ของ Line Notify ที่นี่
 
+date_default_timezone_set('Asia/Bangkok');
+$timenow = date('H:i:s');
+$datenow = date('Y-m-d');
+
 // ฟังก์ชันสำหรับส่งข้อความไปที่ Line Notify
 function notify_message($message, $token)
 {
@@ -36,6 +40,12 @@ if (!isset($_SESSION['USER_NO']) || empty($_SESSION['USER_NO'])) {
     header("location: login.php");
     exit();
 }
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
+
+
 
 try {
     // พยายามเชื่อมต่อฐานข้อมูล
@@ -332,7 +342,7 @@ exit();
         <div class="mb-3">
             <div style="padding-top: 30px;">
                 <label for="s_date" class="form-label">วันที่ซ่อม</label>
-                <input type="date" class="form-control appointment_date" name="s_date" required="true">
+                <input type="text" class="form-control appointment_date" name="s_date" value="<?php echo date('Y-m-d');?> "readonly required="true" >
             </div>
         </div>
 
@@ -346,7 +356,7 @@ exit();
 <div class="mb-3">
     <div style="padding-top: 30px;">
         <label for="s_price" class="form-label">ราคาการซ่อม</label>
-        <textarea class="form-control" id="s_price" name="s_price" style="height: 100px"></textarea>
+        <textarea class="form-control" id="s_price" name="s_price" style="height: 100px" oninput="validateNumericInput(this)"></textarea>
     </div>
 </div>
 
@@ -442,6 +452,23 @@ $(document).ready(function () {
         });
     });
 });
+
+function validateNumericInput(element) {
+    // Remove non-numeric characters
+    element.value = element.value.replace(/[^0-9.]/g, '');
+
+    // Ensure the value starts with a number or decimal point
+    if (!/^[0-9.]/.test(element.value)) {
+        element.value = '';
+    }
+
+    // Ensure only one decimal point is present
+    var countDecimalPoints = (element.value.match(/\./g) || []).length;
+    if (countDecimalPoints > 1) {
+        element.value = element.value.slice(0, -1);
+    }
+}
+
 
 </script>
 

@@ -7,6 +7,15 @@ $lineNotifyToken = "Y3zH1oQp4rVu0Wx4wINmhNzy5wCwpVwCv5Dp8kfVkkI";
 
 $query = new SCDB();
 
+if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
+    header("location: login.php");
+    exit();
+}
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
+
 try {
     if (!$query->connect()) {
         throw new Exception("Database connection error: " . $query->getError());

@@ -23,11 +23,6 @@ $sqlAppointmentHistory = "SELECT m.m_id, m.m_date_S, m.m_time, m.m_status, d.du_
     JOIN tb_durable d ON m.du_id = d.du_id
     WHERE m.p_id = :p_id";
 
-// Check if the search term is provided
-if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $searchTerm = $_GET['search'];
-    $sqlAppointmentHistory .= " AND m.m_id = :searchTerm";
-}
 
 // Check if start date is provided
 if (isset($_GET['startDate']) && !empty($_GET['startDate'])) {
@@ -44,10 +39,6 @@ if (isset($_GET['endDate']) && !empty($_GET['endDate'])) {
 $stmtAppointmentHistory = $query->prepare($sqlAppointmentHistory);
 $stmtAppointmentHistory->bindParam(':p_id', $u_id, PDO::PARAM_INT);
 
-// Bind search term parameter if set
-if (isset($searchTerm)) {
-    $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
-}
 
 // Bind start date parameter if set
 if (isset($startDate)) {
@@ -164,11 +155,8 @@ $stmtAppointmentHistory->execute();
                                         </div>
                                         <!-- Add this form section above your table -->
                                         <div style="padding-top: 10px;">
-    <form method="get">
-        <label for="search">ค้นหา :</label>
-        <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
-        
-        <label for="startDate">ตั้งแต่วันที่:</label>
+    <form method="get">        
+        <label for="startDate">ค้นหาตั้งแต่วันที่:</label>
         <input type="date" name="startDate" id="startDate">
 
         <label for="endDate">ถึงวันที่:</label>

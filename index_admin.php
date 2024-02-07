@@ -9,6 +9,11 @@ if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
     header("location: login.php");
     exit();
 }
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
+
 
 try {
     if (!$query->connect()) {

@@ -10,7 +10,10 @@ if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
     header("location: login.php");
     exit();
 }
-
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
 // Set the number of records per page
 $recordsPerPage = 30;
 
@@ -18,7 +21,6 @@ $recordsPerPage = 30;
 $page = isset($_GET['page']) ? $_GET['page'] : 1;
 
 // Get search parameters if submitted
-$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : '';
 $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : '';
 
@@ -37,9 +39,6 @@ try {
                     WHERE m.m_status = 1";
 
     // Add search conditions
-    if (!empty($searchTerm)) {
-        $sqlAppointments .= " AND m.m_id = :searchTerm";
-    }
     if (!empty($startDate)) {
         $sqlAppointments .= " AND m.m_date_S >= :startDate";
     }
@@ -53,9 +52,7 @@ try {
     $stmtAppointmentHistory = $query->prepare($sqlAppointments);
 
     // Bind search parameters
-    if (!empty($searchTerm)) {
-        $stmtAppointmentHistory->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
-    }
+
     if (!empty($startDate)) {
         $stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
     }
@@ -69,9 +66,7 @@ try {
     $totalRecordsQuery = "SELECT COUNT(*) as total FROM tb_du_maint WHERE m_status = 1";
 
     // Add search conditions
-    if (!empty($searchTerm)) {
-        $totalRecordsQuery .= " AND m_id = :searchTerm";
-    }
+
     if (!empty($startDate)) {
         $totalRecordsQuery .= " AND m_date_S >= :startDate";
     }
@@ -82,9 +77,6 @@ try {
     $totalRecordsStmt = $query->prepare($totalRecordsQuery);
 
     // Bind search parameters
-    if (!empty($searchTerm)) {
-        $totalRecordsStmt->bindParam(':searchTerm', $searchTerm, PDO::PARAM_STR);
-    }
     if (!empty($startDate)) {
         $totalRecordsStmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
     }
@@ -147,9 +139,6 @@ try {
                                                 <div>
                                                     <div style="padding-top: 10px;">
                                                         <form method="get">
-                                                            <label for="search">ค้นหา :</label>
-                                                            <input type="text" name="search" id="search" placeholder="ระบุรหัสการแจ้งซ่อม">
-
                                                             <label for="startDate">ตั้งแต่วันที่:</label>
                                                             <input type="date" name="startDate" id="startDate" value="<?php echo $startDate; ?>">
 

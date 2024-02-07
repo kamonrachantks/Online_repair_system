@@ -9,11 +9,18 @@ define('LINE_API', "https://notify-api.line.me/api/notify");
 
 $token = "Y3zH1oQp4rVu0Wx4wINmhNzy5wCwpVwCv5Dp8kfVkkI"; // Replace with your actual LINE Notify token
 
-if (!isset($_SESSION['USER_NO']) || empty($_SESSION['USER_NO'])) {
+date_default_timezone_set('Asia/Bangkok');
+$timenow = date('H:i:s');
+$datenow = date('Y-m-d');
+
+if ((!isset($_SESSION['USER_NO'])) || ($_SESSION['USER_NO'] == '')) {
     header("location: login.php");
     exit();
 }
-
+if (!isset($_SESSION['u_status']) || $_SESSION['u_status'] !== '1') {
+    header("location: login.php");
+    exit();
+}
 try {
     if (!$query->connect()) {
         throw new Exception("Database connection error: " . $query->getError());
@@ -198,7 +205,6 @@ function duIdExists($du_id, $optionsForDatalist)
 
 <body>
 
-<!-- About Section -->
 <section class="about_section">
     <div class="container">
         <div class="row">
@@ -231,23 +237,42 @@ function duIdExists($du_id, $optionsForDatalist)
                                 <div class="mb-3">
                                     <div style="padding-top: 30px;">
                                         <label>วันที่</label>
-                                        <input type="date" class="form-control appointment_date" placeholder="Date" name="m_date_S" required="true">
+                                        <input type="text" class="form-control appointment_date" placeholder="Date" name="m_date_S" value="<?php echo date('Y-m-d');?> "readonly required="true">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <div style="padding-top: 30px;">
                                         <label>เวลา</label>
-                                        <input type="time" class="form-control appointment_time" placeholder="Time" name="m_time" required="true">
+                                        <input type="text" class="form-control appointment_time" placeholder="Time" name="m_time" value="<?php echo date('H:i');?> "readonly required="true">
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <div style="padding-top: 30px;">
-                                        <label for="m_comment" class="form-label">รายละเอียดการซ่อม/ปัญหา</label>
-                                        <textarea class="form-control" id="m_comment" name="m_comment" style="height: 100px"></textarea>
-                                    </div>
-                                </div>
+    <div style="padding-top: 30px;">
+        <label for="m_comment" class="form-label">รายละเอียดการซ่อม/ปัญหา</label>
+        <input class="form-control" list="datalistOptions2" id="m_comment" name="m_comment" required="true">
+        <datalist id="datalistOptions2">
+            <?php
+            try {
+                // Prepare and execute query to fetch Details_repair from tb_du_Details_repair
+                $sqlForDetailsRepair = "SELECT Details_repair FROM tb_du_Details_repair";
+                $stmtForDetailsRepair = $query->prepare($sqlForDetailsRepair);
+                $stmtForDetailsRepair->execute();
+
+                // Loop through the results and generate options for datalist
+                while ($rowForDetailsRepair = $stmtForDetailsRepair->fetch(PDO::FETCH_ASSOC)) {
+                    echo "<option value='{$rowForDetailsRepair['Details_repair']}'>{$rowForDetailsRepair['Details_repair']}</option>";
+                }
+            } catch (Exception $e) {
+                // Handle any errors that occur during the query execution
+                echo "An error occurred while fetching data: " . $e->getMessage();
+            }
+            ?>
+        </datalist>
+    </div>
+</div>
+
 
                                 <button type="submit" class="btn btn-primary float-end" id="tb_du_maint">
                                     <i class="fa fa-save"></i> บันทึก
@@ -260,77 +285,85 @@ function duIdExists($du_id, $optionsForDatalist)
         </div>
     </div>
 </section>
-        <!-- End About Section -->
-        
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/wow/wow.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
 
-    <!-- SweetAlert2 Script -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- JavaScript Libraries -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="lib/wow/wow.min.js"></script>
+<script src="lib/easing/easing.min.js"></script>
+<script src="lib/waypoints/waypoints.min.js"></script>
+<script src="lib/owlcarousel/owl.carousel.min.js"></script>
 
-    <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+<!-- SweetAlert2 Script -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
- $(document).ready(function () {
-    // Form submission using AJAX
-    $("#form1").submit(function (e) {
-        e.preventDefault();
+<!-- Template Javascript -->
+<script src="js/main.js"></script>
 
-        // Serialize form data
-        var formData = $(this).serialize();
+<script>
+    $(document).ready(function () {
+        // Form submission using AJAX
+        $("#form1").submit(function (e) {
+            e.preventDefault();
 
-        // AJAX request
-        $.ajax({
-            type: "POST",
-            url: "?Action=chk",
-            data: formData,
-            success: function (response) {
-                // Parse the JSON response
-                var result = JSON.parse(response);
+            // Serialize form data
+            var formData = $(this).serialize();
 
-                // Check if the operation was successful
-                if (result.success) {
-                    // Show success message using SweetAlert2
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'บันทึกรายการสำเร็จ',
-                        timer: 1000,
-                        timerProgressBar: true,
-                        showConfirmButton: false
-                            }).then(() => {
-                                window.location.href = 'service_admin4.php';
-                            });
-                } else {
-                    // Show error message using SweetAlert2
+            // AJAX request
+            $.ajax({
+                type: "POST",
+                url: "?Action=chk",
+                data: formData,
+                success: function (response) {
+                    // Parse the JSON response
+                    var result = JSON.parse(response);
+
+                    // Check if the operation was successful
+                    if (result.success) {
+                        // Show success message using SweetAlert2
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกรายการสำเร็จ',
+                            timer: 1000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = 'service_admin4.php';
+                        });
+                    } else {
+                        // Show error message using SweetAlert2
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด',
+                            text: result.message
+                        });
+                    }
+                },
+                error: function () {
+                    // Show generic error message using SweetAlert2
                     Swal.fire({
                         icon: 'error',
                         title: 'เกิดข้อผิดพลาด',
-                        text: result.message
+                        text: 'เกิดข้อผิดพลาดในการส่งข้อมูล'
                     });
                 }
-            },
-            error: function () {
-                // Show generic error message using SweetAlert2
-                Swal.fire({
-                    icon: 'error',
-                    title: 'เกิดข้อผิดพลาด',
-                    text: 'เกิดข้อผิดพลาดในการส่งข้อมูล'
-                });
-            }
+            });
         });
     });
-});
 
-
-    </script>
+    $("#m_comment").change(function () {
+        if ($(this).val() === "อื่นๆ") {
+            $("#other_comment").show();
+            $("#other_comment_input").prop("required", true);
+        } else {
+            $("#other_comment").hide();
+            $("#other_comment_input").prop("required", false);
+        }
+    });
+</script>
 
 </body>
 
 <?php include_once('footer.php'); ?>
+
 </html>
