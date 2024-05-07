@@ -23,7 +23,6 @@ $sqlAppointmentHistory = "SELECT m.m_id, m.m_date_S, m.m_time, m.m_status, d.du_
     JOIN tb_durable d ON m.du_id = d.du_id
     WHERE m.p_id = :p_id";
 
-
 // Check if start date is provided
 if (isset($_GET['startDate']) && !empty($_GET['startDate'])) {
     $startDate = $_GET['startDate'];
@@ -35,6 +34,8 @@ if (isset($_GET['endDate']) && !empty($_GET['endDate'])) {
     $endDate = $_GET['endDate'];
     $sqlAppointmentHistory .= " AND m.m_date_S <= :endDate";
 }
+
+$sqlAppointmentHistory .= " ORDER BY m.m_date_S DESC, m.m_time DESC";
 
 $stmtAppointmentHistory = $query->prepare($sqlAppointmentHistory);
 $stmtAppointmentHistory->bindParam(':p_id', $u_id, PDO::PARAM_INT);

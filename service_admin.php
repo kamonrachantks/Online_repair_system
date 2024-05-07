@@ -27,20 +27,24 @@ try {
     // Get search parameters if submitted
     $startDate = isset($_GET['startDate']) ? $_GET['startDate'] : '';
     $endDate = isset($_GET['endDate']) ? $_GET['endDate'] : '';
-
+    
     $sqlAppointments = "SELECT m.m_id, d.du_name, m_comment, m.m_date_S, m.m_time, m.m_status FROM tb_du_maint m
-                        JOIN tb_durable d ON m.du_id = d.du_id
-                        WHERE m.m_status IS NULL";
+    JOIN tb_durable d ON m.du_id = d.du_id
+    WHERE m.m_status IS NULL";
 
-    // Add search conditions for date range
-    if (!empty($startDate)) {
-        $sqlAppointments .= " AND m.m_date_S >= :startDate";
-    }
-    if (!empty($endDate)) {
-        $sqlAppointments .= " AND m.m_date_S <= :endDate";
-    }
+// Add search conditions for date range
+if (!empty($startDate)) {
+$sqlAppointments .= " AND m.m_date_S >= :startDate";
+}
+if (!empty($endDate)) {
+$sqlAppointments .= " AND m.m_date_S <= :endDate";
+}
 
-    $stmtAppointmentHistory = $query->prepare($sqlAppointments);
+// Order by the m_date_S in descending order
+$sqlAppointments .= " ORDER BY m.m_date_S DESC";
+
+$stmtAppointmentHistory = $query->prepare($sqlAppointments);
+
 
     // Bind search parameters
     if (!empty($startDate)) {

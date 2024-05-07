@@ -54,34 +54,37 @@ try {
         $endDate = $_GET['endDate'];
     }
 
-    // Fetch all maintenance requests where m_status is 2
     $sqlAppointments = "SELECT m.m_id, d.du_name, m.m_date_S, m.m_time, m.m_status 
-                        FROM tb_du_maint m
-                        JOIN tb_durable d ON m.du_id = d.du_id
-                        WHERE m.m_status = 2";
+    FROM tb_du_maint m
+    JOIN tb_durable d ON m.du_id = d.du_id
+    WHERE m.m_status = 2";
 
-    // Modify the SQL query based on the date filters
-    if (isset($startDate)) {
-        $sqlAppointments .= " AND m.m_date_S >= :startDate";
-    }
+// Modify the SQL query based on the date filters
+if (isset($startDate)) {
+$sqlAppointments .= " AND m.m_date_S >= :startDate";
+}
 
-    if (isset($endDate)) {
-        $sqlAppointments .= " AND m.m_date_S <= :endDate";
-    }
+if (isset($endDate)) {
+$sqlAppointments .= " AND m.m_date_S <= :endDate";
+}
 
-    $stmtAppointmentHistory = $query->prepare($sqlAppointments);
+// Order by the m_date_S in descending order
+$sqlAppointments .= " ORDER BY m.m_date_S DESC";
 
-    // Bind start date parameter if set
-    if (isset($startDate)) {
-        $stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
-    }
+$stmtAppointmentHistory = $query->prepare($sqlAppointments);
 
-    // Bind end date parameter if set
-    if (isset($endDate)) {
-        $stmtAppointmentHistory->bindParam(':endDate', $endDate, PDO::PARAM_STR);
-    }
+// Bind start date parameter if set
+if (isset($startDate)) {
+$stmtAppointmentHistory->bindParam(':startDate', $startDate, PDO::PARAM_STR);
+}
 
-    $stmtAppointmentHistory->execute();
+// Bind end date parameter if set
+if (isset($endDate)) {
+$stmtAppointmentHistory->bindParam(':endDate', $endDate, PDO::PARAM_STR);
+}
+
+$stmtAppointmentHistory->execute();
+
 
 } catch (Exception $e) {
     // Log or handle the exception appropriately
